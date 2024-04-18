@@ -21,7 +21,8 @@ if [[ "$KVM" != [Nn]* ]]; then
     if ! sh -c 'echo -n > /dev/kvm' &> /dev/null; then
       KVM_ERR="(no write access)"
     else
-      if ! grep -q -e vmx -e svm /proc/cpuinfo; then
+      flags=$(sed -ne '/^flags/s/^.*: //p' /proc/cpuinfo)
+      if ! grep -qw "vmx\|svm" <<< "$flags"; then
         KVM_ERR="(vmx/svm disabled)"
       fi
     fi
@@ -39,7 +40,6 @@ fi
 if [[ "$KVM" != [Nn]* ]]; then
 
   CPU_FEATURES="kvm=on,l3-cache=on"
-  HV_FEATURES="+hypervisor,+invtsc,hv_passthrough"
   KVM_OPTS=",accel=kvm -enable-kvm -global kvm-pit.lost_tick_policy=discard"
 
   if [ -z "$CPU_MODEL" ]; then
@@ -47,14 +47,54 @@ if [[ "$KVM" != [Nn]* ]]; then
     CPU_FEATURES="$CPU_FEATURES,migratable=no"
   fi
 
+  if [[ "$HV" != [Nn]* ]] && [[ "${BOOT_MODE,,}" == "windows"* ]]; then
+
+    HV_FEATURES="+hypervisor,hv_passthrough"
+
+    if grep -qw "svm" <<< "$flags"; then
+
+      # AMD processor
+
+      if grep -qw "tsc_scale" <<< "$flags"; then
+        HV_FEATURES="$HV_FEATURES,+invtsc"
+      fi
+
+      if ! grep -qw "avic" <<< "$flags"; then
+        HV_FEATURES="$HV_FEATURES,-hv-avic"
+      fi
+
+    else
+
+      # Intel processor
+
+      vmx=$(sed -ne '/^vmx flags/s/^.*: //p' /proc/cpuinfo)
+
+      if grep -qw "tsc_scaling" <<< "$vmx"; then
+        HV_FEATURES="$HV_FEATURES,+invtsc"
+      fi
+
+      if ! grep -qw "apicv" <<< "$vmx"; then
+        HV_FEATURES="$HV_FEATURES,-hv-apicv,-hv-evmcs"
+      else
+        if ! grep -qw "shadow_vmcs" <<< "$vmx"; then
+          # Prevent eVMCS version range error on Atom CPU's
+          HV_FEATURES="$HV_FEATURES,-hv-evmcs"
+        fi
+      fi
+
+    fi
+
+    [ -n "$CPU_FEATURES" ] && CPU_FEATURES="$CPU_FEATURES,"
+    CPU_FEATURES="$CPU_FEATURES${HV_FEATURES}"
+
+  fi
+
 else
 
+  KVM_OPTS=""
   CPU_FEATURES="l3-cache=on"
-  HV_FEATURES="+hypervisor,hv_passthrough"
 
-  if [[ "$ARCH" != "amd64" ]]; then
-    KVM_OPTS=""
-  else
+  if [[ "$ARCH" == "amd64" ]]; then
     KVM_OPTS=" -accel tcg,thread=multi"
   fi
 
@@ -69,12 +109,9 @@ else
 
   CPU_FEATURES="$CPU_FEATURES,+ssse3,+sse4.1,+sse4.2"
 
-fi
-
-if [[ "$HV" != [Nn]* ]] && [[ "${BOOT_MODE,,}" == "windows"* ]]; then
-
-  [ -n "$CPU_FEATURES" ] && CPU_FEATURES="$CPU_FEATURES,"
-  CPU_FEATURES="$CPU_FEATURES${HV_FEATURES}"
+  if [[ "$HV" != [Nn]* ]] && [[ "${BOOT_MODE,,}" == "windows"* ]]; then
+    CPU_FEATURES="$CPU_FEATURES,+hypervisor"
+  fi
 
 fi
 
