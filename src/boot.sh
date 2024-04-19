@@ -5,8 +5,8 @@ set -Eeuo pipefail
 : "${TPM:="N"}"         # Disable TPM
 : "${BOOT_MODE:="legacy"}"  # Boot mode
 
-SECURE=""
 BOOT_OPTS=""
+SECURE=",smm=off"
 
 case "${BOOT_MODE,,}" in
   uefi)
@@ -14,15 +14,17 @@ case "${BOOT_MODE,,}" in
     VARS="OVMF_VARS_4M.fd"
     ;;
   secure)
+    SECURE=",smm=on"
     ROM="OVMF_CODE_4M.secboot.fd"
     VARS="OVMF_VARS_4M.secboot.fd"
     ;;
   windows | windows_plain)
-    ROM="OVMF_CODE_4M.ms.fd"
-    VARS="OVMF_VARS_4M.ms.fd"
+    ROM="OVMF_CODE_4M.fd"
+    VARS="OVMF_VARS_4M.fd"
     ;;
   windows_secure)
     TPM="Y"
+    SECURE=",smm=on"
     ROM="OVMF_CODE_4M.ms.fd"
     VARS="OVMF_VARS_4M.ms.fd"
     ;;
@@ -43,18 +45,17 @@ if [[ "${BOOT_MODE,,}" != "legacy" ]] && [[ "${BOOT_MODE,,}" != "windows_legacy"
   OVMF="/usr/share/OVMF"
   DEST="$STORAGE/${BOOT_MODE,,}"
 
-  if [ ! -s "$DEST.rom" ]; then
-    [ ! -s "$OVMF/$ROM" ] && error "UEFI boot file ($OVMF/$ROM) not found!" && exit 44
+  if [ ! -s "$DEST.rom" ] || [ ! -f "$DEST.rom" ]; then
+    [ ! -s "$OVMF/$ROM" ] || [ ! -f "$OVMF/$ROM" ] && error "UEFI boot file ($OVMF/$ROM) not found!" && exit 44
     cp "$OVMF/$ROM" "$DEST.rom"
   fi
 
-  if [ ! -s "$DEST.vars" ]; then
-    [ ! -s "$OVMF/$VARS" ] && error "UEFI vars file ($OVMF/$VARS) not found!" && exit 45
+  if [ ! -s "$DEST.vars" ] || [ ! -f "$DEST.vars" ]; then
+    [ ! -s "$OVMF/$VARS" ] || [ ! -f "$OVMF/$VARS" ]&& error "UEFI vars file ($OVMF/$VARS) not found!" && exit 45
     cp "$OVMF/$VARS" "$DEST.vars"
   fi
 
   if [[ "${BOOT_MODE,,}" == "secure" ]] || [[ "${BOOT_MODE,,}" == "windows_secure" ]]; then
-    SECURE=",smm=on"
     BOOT_OPTS="$BOOT_OPTS -global driver=cfi.pflash01,property=secure,value=on"
     [[ "${BOOT_MODE,,}" == "windows_secure" ]] && BOOT_OPTS="$BOOT_OPTS -global ICH9-LPC.disable_s3=1"
   fi
