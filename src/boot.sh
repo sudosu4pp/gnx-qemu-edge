@@ -104,4 +104,12 @@ if [[ "$TPM" == [Yy1]* ]]; then
 
 fi
 
+if [[ "${BOOT_MODE,,}" == "windows"* ]]; then
+  if [ -e /sys/module/kvm/parameters/ignore_msrs ]; then
+    if [ "$(cat /sys/module/kvm/parameters/ignore_msrs)" == "N" ]; then
+      echo 1 | tee /sys/module/kvm/parameters/ignore_msrs > /dev/null 2>&1 || true
+    fi
+  fi
+fi
+
 return 0
