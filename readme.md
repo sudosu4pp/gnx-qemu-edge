@@ -25,7 +25,6 @@ It uses high-performance QEMU options (like KVM acceleration, kernel-mode networ
 Via Docker Compose:
 
 ```yaml
-version: "3"
 services:
   qemu:
     container_name: qemu
@@ -39,7 +38,6 @@ services:
     ports:
       - 8006:8006
     stop_grace_period: 2m
-    restart: on-failure
 ```
 
 Via Docker CLI:
