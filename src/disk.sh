@@ -391,16 +391,22 @@ addMedia () {
   local index=""
   local DISK_ID="cdrom$DISK_BUS"
   [ -n "$DISK_INDEX" ] && index=",bootindex=$DISK_INDEX"
-  local result="-drive file=$DISK_FILE,id=$DISK_ID,if=none,format=raw,media=cdrom,readonly=on"
+  local result="-drive file=$DISK_FILE,id=$DISK_ID,if=none,format=raw,readonly=on,media=cdrom"
 
   case "${DISK_TYPE,,}" in
     "usb" )
       result="$result \
-      -device usb-storage,drive=${DISK_ID}${index}"
+      -device usb-storage,drive=${DISK_ID}${index},removable=on"
+      echo "$result"
       ;;
-    "ide" | "blk" | "virtio-blk" )
+    "ide" )
       result="$result \
       -device ide-cd,drive=${DISK_ID},bus=ide.${DISK_BUS}${index}"
+      echo "$result"
+      ;;
+    "blk" | "virtio-blk" )
+      result="$result \
+      -device virtio-blk-pci,drive=${DISK_ID},scsi=off,bus=pcie.0,addr=$DISK_ADDRESS,iothread=io2${index}"
       echo "$result"
       ;;
     "scsi" | "virtio-scsi" )
@@ -516,7 +522,11 @@ DRIVERS="/drivers.iso"
 [ ! -f "$DRIVERS" ] || [ ! -s "$DRIVERS" ] && DRIVERS="/run/drivers.iso"
 
 if [ -f "$DRIVERS" ]; then
-  DRIVER_OPTS=$(addMedia "$DRIVERS" "ide" "1" "" "0x6")
+  if [[ "${BOOT_MODE,,}" != "legacy" ]] && [[ "${BOOT_MODE,,}" != "windows_legacy" ]]; then
+    DRIVER_OPTS=$(addMedia "$DRIVERS" "usb" "1" "" "0x6")
+  else
+    DRIVER_OPTS=$(addMedia "$DRIVERS" "ide" "1" "" "0x6")
+  fi
   DISK_OPTS="$DISK_OPTS $DRIVER_OPTS"
 fi
 
