@@ -99,42 +99,26 @@ kubectl apply -f kubernetes.yml
 
   Replace the example path `/home/user/example.iso` with the filename of the desired ISO file, the value of `BOOT` will be ignored in this case.
 
-* ### How do I boot without SCSI support?
-
-  By default, the machine makes use of `virtio-scsi` disks for performance reasons, and even though most Linux kernels include drivers for them, there are other operating systems that do not.
-
-  If your ISO fails to boot because of this, you can add this to your compose file:
-
-  ```yaml
-  environment:
-    DISK_TYPE: "blk"
-  ```
-
-   This will use `virtio-blk` devices instead. If it still fails to boot, you can set the value to `ide` to use IDE disks which every OS will support, at the cost of performance.
-
-* ### How do I boot with UEFI?
-
-  To enable UEFI booting, add the following line to your compose file:
-
-  ```yaml
-  environment:
-    BOOT_MODE: "uefi"
-  ```
-
 * ### How do I boot ARM images?
 
   You can use [qemu-arm](https://github.com/qemus/qemu-arm/) to run ARM64-based images.
 
 * ### How do I boot Windows?
 
-  To enable Windows booting, add the following line to your compose file:
+  Use [dockur/windows](https://github.com/dockur/windows) instead, as it includes all the drivers required during installation, amongst many other features.
+
+* ### How do I boot without SCSI drivers?
+
+  By default, the machine makes use of `virtio-scsi` disks for performance reasons, and even though most Linux kernels include the necessary driver for this device, for some other operating systems that may not always be the case.
+
+  If your ISO fails to boot because of this, you can modify your compose file to use `virtio-blk` instead:
 
   ```yaml
   environment:
-    BOOT_MODE: "windows"
+    DISK_TYPE: "blk"
   ```
 
-  But you might want to give [dockur/windows](https://github.com/dockur/windows) a try instead, as it includes all the drivers required during installation amongst many other features.
+   If it still fails to boot, you can set the value to `ide` to emulate a IDE drive, which is slow but compatible with almost every system.
 
 * ### How do I verify if my system supports KVM?
 
