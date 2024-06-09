@@ -10,9 +10,11 @@
 
 </div></h1>
 
-QEMU in a docker container for running x86 and x64 virtual machines.
+Docker container for running virtual machines using QEMU.
 
-It uses high-performance QEMU options (like KVM acceleration, kernel-mode networking, IO threading, etc.) to achieve near-native speed.
+It allows you to create VM's which behave just like normal containers, meaning you can manage them using all your existing tools (like Portainer) and configure them in a language (YAML) you are already familiar with.
+
+This greatly reduces the learning curve and also eliminates the need for a dedicated Proxmox or ESXi server in many cases. It uses high-performance QEMU options (like KVM acceleration, kernel-mode networking, IO threading, etc.) to achieve near-native speed.
 
 ## Features
 
@@ -124,17 +126,6 @@ kubectl apply -f kubernetes.yml
 
    If it still fails to boot, you can set the value to `ide` to emulate a IDE drive, which is slow but requires no drivers and is compatible with almost every system.
 
-* ### How do I verify if my system supports KVM?
-
-  To verify if your system supports KVM, run the following commands:
-
-  ```bash
-  sudo apt install cpu-checker
-  sudo kvm-ok
-  ```
-
-  If you receive an error from `kvm-ok` indicating that KVM acceleration can't be used, check the virtualization settings in the BIOS.
-
 * ### How do I change the amount of CPU or RAM?
 
   By default, the container will be allowed to use a maximum of 1 CPU core and 1 GB of RAM.
@@ -146,6 +137,19 @@ kubectl apply -f kubernetes.yml
     RAM_SIZE: "4G"
     CPU_CORES: "4"
   ```
+
+* ### How do I verify if my system supports KVM?
+
+  To verify that your system supports KVM, run the following commands:
+
+  ```bash
+  sudo apt install cpu-checker
+  sudo kvm-ok
+  ```
+
+  If you receive an error from `kvm-ok` indicating that KVM acceleration can't be used, check whether the virtualization extensions (`Intel VT-x` or `AMD SVM`) are enabled in your BIOS. If you are running the container inside a VM instead of directly on the host, you will also need to enable nested virtualization in its settings. If you are using a cloud provider, you may be out of luck as most of them do not allow nested virtualization for their VPS's. If you are using Windows 10 or MacOS, you are also out of luck, as only Linux and Windows 11 support KVM.
+
+  If you don't receive any error from `kvm-ok` at all, but the container still complains that `/dev/kvm` is missing, it might help to add `privileged: true` to your compose file (or `--privileged` to your `run` command), to rule out any permission issue.
 
 * ### How do I assign an individual IP address to the container?
 
