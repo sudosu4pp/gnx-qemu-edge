@@ -12,7 +12,9 @@ RUN set -eu && \
     apt-get --no-install-recommends -y install \
         tini \
         wget \
+        7zip \
         ovmf \
+        fdisk \
         nginx \
         swtpm \
         procps \
@@ -20,6 +22,7 @@ RUN set -eu && \
         iproute2 \
         apt-utils \
         dnsmasq \
+        xz-utils \
         net-tools \
         qemu-utils \
         genisoimage \
