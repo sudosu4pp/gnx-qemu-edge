@@ -119,7 +119,7 @@ configureDNS() {
 
   DNSMASQ_OPTS=$(echo "$DNSMASQ_OPTS" | sed 's/\t/ /g' | tr -s ' ' | sed 's/^ *//')
 
-  if [[ "$DEBUG" == [Yy1]* ]]; then
+  if [[ "${DEBUG_DNS:-}" == [Yy1]* ]]; then
    DNSMASQ_OPTS+=" -d"
    $DNSMASQ ${DNSMASQ_OPTS:+ $DNSMASQ_OPTS} &
    return 0
@@ -418,6 +418,7 @@ getInfo() {
   IP=$(ip address show dev "$VM_NET_DEV" | grep inet | awk '/inet / { print $2 }' | cut -f1 -d/ | head -n 1)
 
   IP6=""
+  # shellcheck disable=SC2143
   if [ -f /proc/net/if_inet6 ] && [ -n "$(ifconfig -a | grep inet6)" ]; then
     IP6=$(ip -6 addr show dev "$VM_NET_DEV" scope global up)
     [ -n "$IP6" ] && IP6=$(echo "$IP6" | sed -e's/^.*inet6 \([^ ]*\)\/.*$/\1/;t;d' | head -n 1)
