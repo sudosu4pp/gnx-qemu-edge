@@ -306,6 +306,21 @@ fi
 # Set password
 echo "$user:{PLAIN}${PASS:-}" > /etc/nginx/.htpasswd
 
+# Check if IPv6 is supported
+ipv6=$(ifconfig -a | grep inet6)
+
+if [ -f /proc/net/if_inet6 ] && [ -n "$ipv6" ]; then
+
+  sed -i "s/listen 80;/listen [::]:80 ipv6only=off;/g" /etc/nginx/sites-enabled/web.conf
+  sed -i "s/listen 8006 default_server;/listen [::]:8006 default_server ipv6only=off;/g" /etc/nginx/sites-enabled/web.conf
+
+else
+
+  sed -i "s/listen [::]:80 ipv6only=off;/listen 80;/g" /etc/nginx/sites-enabled/web.conf
+  sed -i "s/listen [::]:8006 default_server ipv6only=off;/listen 8006 default_server;/g" /etc/nginx/sites-enabled/web.conf
+
+fi
+
 # Start webserver
 cp -r /var/www/* /run/shm
 html "Starting $APP for Docker..."
