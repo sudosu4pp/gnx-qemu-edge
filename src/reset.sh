@@ -20,8 +20,8 @@ echo "❯ For support visit $SUPPORT"
 : "${MACHINE:="q35"}"      # Machine selection
 : "${ALLOCATE:=""}"        # Preallocate diskspace
 : "${ARGUMENTS:=""}"       # Extra QEMU parameters
-: "${CPU_CORES:="1"}"      # Amount of CPU cores
-: "${RAM_SIZE:="1G"}"      # Maximum RAM amount
+: "${CPU_CORES:="2"}"      # Amount of CPU cores
+: "${RAM_SIZE:="2G"}"      # Maximum RAM amount
 : "${RAM_CHECK:="Y"}"      # Check available RAM
 : "${DISK_SIZE:="16G"}"    # Initial data disk size
 : "${BOOT_MODE:=""}"       # Boot system with UEFI
@@ -307,9 +307,7 @@ fi
 echo "$user:{PLAIN}${PASS:-}" > /etc/nginx/.htpasswd
 
 # Check if IPv6 is supported
-ipv6=$(ifconfig -a | grep inet6)
-
-if [ -f /proc/net/if_inet6 ] && [ -n "$ipv6" ]; then
+if [ -f /proc/net/if_inet6 ] && [ -n "$(ifconfig -a | grep inet6)" ]; then
 
   sed -i "s/listen 80;/listen [::]:80 ipv6only=off;/g" /etc/nginx/sites-enabled/web.conf
   sed -i "s/listen 8006 default_server;/listen [::]:8006 default_server ipv6only=off;/g" /etc/nginx/sites-enabled/web.conf
