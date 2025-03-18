@@ -75,7 +75,7 @@ kubectl apply -f https://raw.githubusercontent.com/qemus/qemu/refs/heads/master/
 
   - Set the `BOOT` variable to the [operating system](#how-do-i-select-the-operating-system) you want to install.
 
-  - Start the container and connect to [port 8006](http://localhost:8006) using your web browser.
+  - Start the container and connect to [port 8006](http://127.0.0.1:8006/) using your web browser.
 
   - You will see the screen and can now install the OS of your choice using your keyboard and mouse.
 
@@ -98,9 +98,8 @@ kubectl apply -f https://raw.githubusercontent.com/qemus/qemu/refs/heads/master/
   | `alpine`   | Alpine Linux    | 60 MB    |
   | `arch`     | Arch Linux      | 1.2 GB   |
   | `cachy`    | CachyOS         | 2.6 GB   |
-  | `centos`   | CentOS Stream   | 7.0 GB   |
+  | `centos`   | CentOS          | 7.0 GB   |
   | `debian`   | Debian          | 3.3 GB   |
-  | `endeavour`| EndeavourOS     | 3.0 GB   |
   | `fedora`   | Fedora          | 2.3 GB   |
   | `gentoo`   | Gentoo          | 3.6 GB   |
   | `kali`     | Kali Linux      | 3.8 GB   |
