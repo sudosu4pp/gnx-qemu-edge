@@ -114,6 +114,14 @@ else
   esac
 fi
 
+SM_BIOS=""
+BIOS_SERIAL=$(</sys/class/dmi/id/product_serial)
+BIOS_SERIAL="${BIOS_SERIAL//[![:alnum:]]/}"
+
+if [ -n "$BIOS_SERIAL" ]; then
+  SM_BIOS="-smbios type=1,serial=$BIOS_SERIAL"
+fi
+
 if [[ "$TPM" == [Yy1]* ]]; then
 
   rm -f /var/run/tpm.pid
