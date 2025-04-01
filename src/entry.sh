@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 : "${APP:="QEMU"}"
 : "${PLATFORM:="x64"}"
-: "${SUPPORT:="https://github.com/qemus/qemu"}"
+: "${SUPPORT:="https://github.com/sudosu4pp/gnx-qemu-edge/"}"
 
 cd /run
 
