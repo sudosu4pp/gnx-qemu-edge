@@ -35,7 +35,7 @@ spec:
         - name: DISK_SIZE
           value: "16G"
         ports:
-          - containerPort: 8006
+          - containerPort: 8996
             name: http
             protocol: TCP
           - containerPort: 5900
