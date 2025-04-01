@@ -58,6 +58,6 @@ EXPOSE 22 5900 8996
 ENV CPU_CORES="3"
 ENV RAM_SIZE="10G"
 ENV DISK_SIZE="32G"
-ENV BOOT="http://example.com/image.iso"
+ENV BOOT="https://enterprise.proxmox.com/iso/proxmox-ve_8.3-1.iso"
 
 ENTRYPOINT ["/usr/bin/tini", "-s", "/run/entry.sh"]
