@@ -1,4 +1,4 @@
-FROM debian:trixie-slim
+FROM debian:bookworm-slim
 
 ARG VERSION_ARG="0.0"
 ARG VERSION_VNC="1.6.0"
@@ -53,11 +53,11 @@ COPY --chmod=664 ./web/conf/mandatory.json /usr/share/novnc
 COPY --chmod=744 ./web/conf/nginx.conf /etc/nginx/sites-enabled/web.conf
 
 VOLUME /storage
-EXPOSE 22 5900 8006
+EXPOSE 22 5900 8996
 
-ENV CPU_CORES="2"
-ENV RAM_SIZE="2G"
-ENV DISK_SIZE="16G"
+ENV CPU_CORES="3"
+ENV RAM_SIZE="10G"
+ENV DISK_SIZE="32G"
 ENV BOOT="http://example.com/image.iso"
 
 ENTRYPOINT ["/usr/bin/tini", "-s", "/run/entry.sh"]
